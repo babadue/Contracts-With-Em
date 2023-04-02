@@ -1,6 +1,6 @@
 Contracts With Em
 
-Solidity and dApp using Javascript
+A Smart Contract using Solidity and dApp using Javascript
 
 A Deeds Rewarding Smart Contract
 
