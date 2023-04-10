@@ -33,6 +33,7 @@ contract ContractsWithEm {
 
     function addDevl(address _emAddress, uint _level, uint _reward) public {
         devl[_emAddress] = Em(_emAddress, block.timestamp, _level, _reward);
+        addToEms(devl[_emAddress]);
     }
 
     function getDevl(address _emAddress) public view returns (Em memory) {
@@ -93,6 +94,7 @@ contract ContractsWithEm {
         texts.push("Do me a favor!");
         texts.push("Two pronged approach!");
         texts.push("I don't know what 'is' is!");
+        texts.push("You are fired!");
     }
 
     function getTexts() public view returns (string[] memory) {
@@ -105,6 +107,10 @@ contract ContractsWithEm {
 
     function getEms() public view returns (Em[] memory) {
         return ems;
+    }
+
+    function addToEms(Em memory _em) internal {
+        ems.push(_em);
     }
 
     function getThisAddress() public view returns (address) {

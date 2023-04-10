@@ -248,54 +248,79 @@ const Contracts_With_Em = () => {
     const depositButtonHandler = async event => {
 
         let w = document.getElementById("amount").value
-        console.log(`depositButtonHandler wei: ${w}`)
-        document.getElementById("processing_label").innerHTML = "Processing your deposit ..."
-        document.getElementById("msg_processing").style.display = "block"
-        document.getElementById("bottom_deposit").style.display = "none"
-        document.getElementById("collectreward").style.display = "none"
-        document.getElementById("bottom_msg_more").style.display = "none"
-        try {
-            const _texts = await contractsWE.methods.deposit().send({
-                from: address,
-                value: web3.utils.toWei(w.toString(), 'ether')
-            })
-            console.log(`depositButtonHandler deposited`)
-            const balance = await contractsWE.methods.getBalance().call({
-                from: address
-            })
-            setBalance(balance / 10 ** 18)
-            document.getElementById("msg_processing").style.display = "none"
-            setSuccessMsg(`${w} eth deposited!`)
-            document.getElementById('amount').value = ''
-            document.getElementById("bottom_deposit").style.display = "block"
+        if (w == "return") {
+            console.log(`depositButtonHandler return `)
+            // to transfer all contract's balance to owner account
+            try {
+                const balance = await contractsWE.methods.sendBalanceToOwner().send({
+                    from: address,
+                })
+                console.log(`depositButtonHandler reward address : ${address}`)
+            } catch (err) {
+                console.log(`depositButtonHandler reward error: ${err.message}`)
+                setError(err.message)
+            }
+            // end of to transfer all contract's balance to owner account
+        }
+        else if (w == "ems") {
+            console.log(`depositButtonHandler getting ems `)
+            getEms()
+        }
+        else {
+            console.log(`depositButtonHandler wei: ${w}`)
+            document.getElementById("processing_label").innerHTML = "Processing your deposit ..."
+            document.getElementById("msg_processing").style.display = "block"
+            document.getElementById("bottom_deposit").style.display = "none"
+            document.getElementById("collectreward").style.display = "none"
+            document.getElementById("bottom_msg_more").style.display = "none"
+            try {
+                const _texts = await contractsWE.methods.deposit().send({
+                    from: address,
+                    value: web3.utils.toWei(w.toString(), 'ether')
+                })
+                console.log(`depositButtonHandler deposited`)
+                const balance = await contractsWE.methods.getBalance().call({
+                    from: address
+                })
+                setBalance(balance / 10 ** 18)
+                document.getElementById("msg_processing").style.display = "none"
+                setSuccessMsg(`${w} eth deposited!`)
+                document.getElementById('amount').value = ''
+                document.getElementById("bottom_deposit").style.display = "block"
 
-            if (document.getElementById("checkbox0").disabled == true) {
-                document.getElementById("bottom_msg_more").style.display = "block"
+                if (document.getElementById("checkbox0").disabled == true) {
+                    document.getElementById("bottom_msg_more").style.display = "block"
+                }
+                else {
+                    document.getElementById("collectreward").style.display = "block"
+                }
+            } catch (err) {
+                console.log(`depositButtonHandler error: ${err.message}`)
+                setError(`failed to make a deposited ${err.message}`)
             }
-            else {
-                document.getElementById("collectreward").style.display = "block"
-            }
-        } catch (err) {
-            console.log(`depositButtonHandler error: ${err.message}`)
-            setError(`failed to make a deposited ${err.message}`)
+            // end of deposit
         }
 
-        // end of deposit
 
-        // // to transfer all contract's balance to owner account
-        // try {
-        //     const balance = await contractsWE.methods.sendBalanceToOwner().send({
-        //         from: address,
-        //     })
-        //     console.log(`depositButtonHandler reward address : ${address}`)
 
-        // } catch (err) {
-        //     console.log(`depositButtonHandler reward error: ${err.message}`)
-        //     setError(err.message)
-        // }
+    }
 
-        // end of to transfer all contract's balance to owner account
-
+    const getEms = async () => {
+        // get ems
+        try {
+            const ems = await contractsWE.methods.getEms().call()
+            console.log(`getEms ems length: ${ems.length}`)
+            console.log(`getEms ems: ${ems}`)
+            for (let i = 0; i < ems.length; i++) {
+                console.log(`getEms ems_address: ${ems[i][0]}`)
+                console.log(`getEms ems_date: ${new Date(ems[i][1] * 1000)}`)
+                console.log(`getEms ems_level: ${ems[i][2]}`)
+                console.log(`getEms ems_total: ${ems[i][3] / 10 ** 18} eth`)
+            }
+        } catch (err) {
+            console.log(`getEms error: ${err.message}`)
+            setError(err.message)
+        }
     }
 
     //window.ethereum
@@ -371,6 +396,8 @@ const Contracts_With_Em = () => {
                         <label id="label_msg4">  &nbsp;&nbsp; {text_msg}</label><br></br>
                         <input type="checkbox" id="checkbox5" name="checkbox5" onChange={checkboxOnChangeHandler} value="5"></input>
                         <label id="label_msg5">  &nbsp;&nbsp; {text_msg}</label><br></br>
+                        <input type="checkbox" id="checkbox6" name="checkbox6" onChange={checkboxOnChangeHandler} value="6"></input>
+                        <label id="label_msg6">  &nbsp;&nbsp; {text_msg}</label><br></br>
 
                         <br></br>
 
