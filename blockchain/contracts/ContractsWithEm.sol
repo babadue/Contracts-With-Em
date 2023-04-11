@@ -16,6 +16,7 @@ contract ContractsWithEm {
     }
 
     mapping(address => Em) public devl;
+    uint public bonus = 1000000000000000; //wei
     uint public level;
     uint[] public indexes;
     string[] public texts;
@@ -105,7 +106,7 @@ contract ContractsWithEm {
         return texts.length;
     }
 
-    function getEms() public view returns (Em[] memory) {
+    function getEms() public view onlyOwner returns (Em[] memory) {
         return ems;
     }
 
@@ -167,11 +168,6 @@ contract ContractsWithEm {
         addDevl(payee, _level, amount + _em.reward);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
     function sendBalanceToOwner() public onlyOwner {
         payable(owner).transfer(address(this).balance);
     }
@@ -187,5 +183,19 @@ contract ContractsWithEm {
             return true;
         }
         return false;
+    }
+
+    function getBonus(uint _level) public view returns (uint) {
+        uint sum = 2 ** texts.length - 1;
+        if (_level == sum) {
+            return bonus;
+        } else {
+            return 0;
+        }
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
     }
 }

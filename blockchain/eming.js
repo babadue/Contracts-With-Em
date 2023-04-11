@@ -61,6 +61,19 @@ const abi = [
     },
     {
         "inputs": [],
+        "name": "bonus",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "deposit",
         "outputs": [],
         "stateMutability": "payable",
@@ -241,6 +254,25 @@ const abi = [
     {
         "inputs": [],
         "name": "getBalance",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_level",
+                "type": "uint256"
+            }
+        ],
+        "name": "getBonus",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -682,11 +714,10 @@ const abi = [
         "type": "function"
     }
 ]
-
 const ContractsWithEm = web3 => {
     return new web3.eth.Contract(
         abi,
-        "your contract id goes here"
+        "put your contract id here"
         // "put your smart contract id here after deployed"
     )
 }

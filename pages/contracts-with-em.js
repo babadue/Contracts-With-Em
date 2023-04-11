@@ -26,6 +26,7 @@ const Contracts_With_Em = () => {
     var texts = []
     var disable = false
     var aaa = 1
+    var blinkFnc;
 
     // useEffect shown upon page loaded
     useEffect(() => {
@@ -45,6 +46,8 @@ const Contracts_With_Em = () => {
         document.getElementById("bottom_deposit").style.display = "none"
         document.getElementById("msg_success").style.display = "none"
         document.getElementById("msg_processing").style.display = "none"
+        document.getElementById("msg_bonus").style.display = "none"
+
     }
 
     const my_lab = async () => {
@@ -165,6 +168,13 @@ const Contracts_With_Em = () => {
         document.getElementById("label_msgX").innerHTML = ` &nbsp;&nbsp; ${text_msgX}`
     }
 
+    function blink(f) {
+        // var f = document.getElementById('msg_bonus');
+        blinkFnc = setInterval(function () {
+            f.style.display = (f.style.display == 'none' ? '' : 'none');
+        }, 1000);
+    }
+
     const collectRewardHandler = async event => {
         if (level > 0) {
             if (address) {
@@ -173,13 +183,27 @@ const Contracts_With_Em = () => {
                 document.getElementById("msg_processing").style.display = "block"
                 document.getElementById("bottom_deposit").style.display = "none"
                 document.getElementById("collectreward").style.display = "none"
+                var bonusLabel = document.getElementById("msg_bonus")
                 const _owner = await contractsWE.methods.owner().call()
                 console.log(`contractsWE _owner  :: ${_owner}`)
                 console.log(`collectRewardHandler you will receive ${reward} in your wallet shortly!  level: ${level} address: ${address}`)
                 try {
-                    const x = await contractsWE.methods.reward(web3.utils.toWei(reward.toString(), 'ether'), level, address).send({
+                    const bonus = await contractsWE.methods.getBonus(level).call()  //return in wei
+                    if (bonus > 0) {
+                        document.getElementById("bonus_label").innerHTML = "Congratulations!&nbsp;&nbsp;  You have earned a bonus of " + `${bonus / 10 ** 18}` + " eth for your deeds."
+                        // document.getElementById("msg_bonus").style.display = "block"
+                        bonusLabel.style.display = "block"
+                        blink(bonusLabel)  // blinking
+                    }
+                    const total = await contractsWE.methods.addition(bonus, web3.utils.toWei(reward.toString(), 'ether')).call()
+                    console.log(`collectMoreDeedsHandler total: ${total}`)
+                    const x = await contractsWE.methods.reward(total, level, address).send({
                         from: address,
                     })
+                    // console.log(`collectMoreDeedsHandler bonus+reward: ${(bonus + web3.utils.toWei(reward.toString(), 'ether')) / 10 ** 18}`)
+                    // const x = await contractsWE.methods.reward(web3.utils.toWei(reward.toString(), 'ether'), level, address).send({
+                    //     from: address,
+                    // })
                     const em = await contractsWE.methods.getDevl(address).call()
                     console.log(`collectMoreDeedsHandler em ${em}`)
                     let aReward = em[3] / 10 ** 18  //in wei
@@ -195,6 +219,9 @@ const Contracts_With_Em = () => {
                     }
 
                     document.getElementById("msg_processing").style.display = "none"
+                    document.getElementById("msg_bonus").style.display = "none"
+                    clearInterval(blinkFnc)
+                    document.getElementById("msg_bonus").style.display = "none"
                     console.log(`depositButtonHandler reward address : ${address}`)
                     let msg = `You got your reward in amount of ${reward} eth for your deeds! &nbsp; Your total reward so far: ${aReward}`
                     document.getElementById("label_total_reward").innerHTML = `${msg}`
@@ -202,6 +229,9 @@ const Contracts_With_Em = () => {
                     reward = 0
                 } catch (err) {
                     console.log(`depositButtonHandler reward error: ${err.message}`)
+                    document.getElementById("msg_processing").style.display = "none"
+                    document.getElementById("msg_bonus").style.display = "none"
+                    clearInterval(blinkFnc)
                     setError(err.message)
                 }
             }
@@ -222,6 +252,7 @@ const Contracts_With_Em = () => {
         document.getElementById("label_msgX").innerHTML = ` &nbsp;&nbsp; ${text_msgX}`
         document.getElementById("collect_reward_button").disabled = false
         document.getElementById("msg_success").style.display = "none"
+        setError('')
         console.log(`1 collectMoreDeedsHandler reward: ${reward}`)
         const _texts = await contractsWE.methods.getTexts().call()
         console.log(`2 collectMoreDeedsHandler reward: ${reward}`)
@@ -308,7 +339,9 @@ const Contracts_With_Em = () => {
     const getEms = async () => {
         // get ems
         try {
-            const ems = await contractsWE.methods.getEms().call()
+            const ems = await contractsWE.methods.getEms().call({
+                from: address
+            })
             console.log(`getEms ems length: ${ems.length}`)
             console.log(`getEms ems: ${ems}`)
             for (let i = 0; i < ems.length; i++) {
@@ -325,6 +358,7 @@ const Contracts_With_Em = () => {
 
     //window.ethereum
     const connectWalletHandler = async () => {
+        setError('')
         /* check if MetaMask is available */
         if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
             try {
@@ -449,6 +483,10 @@ const Contracts_With_Em = () => {
                 <section>
                     <div id="msg_processing" className='container has-text-success'>
                         <label id="processing_label"> </label>
+                    </div>
+                    <br></br><br></br>
+                    <div id="msg_bonus" className='container has-text-black'>
+                        <label id="bonus_label"> </label>
                     </div>
                 </section>
             </div>
